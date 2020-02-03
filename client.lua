@@ -16,63 +16,60 @@
                                                                      
 --]]
 
-local ped = PlayerPedId()
-
-local damages = {
-    h1 = 25,
-    h2 = 50,
-    h3 = 75,
-    h4 = 100
-}
-
-local anticheat = true -- If true then code will reset MaxHealth to 200 ( the default ) in case that limit is over-reached. Making maxhealth cheats useless
-
-phealth = ( GetEntityHealth( ped ) / GetEntityMaxHealth( ped ) ) * 100
-
-prag = IsPedRagdoll( ped )
-
-frag = IsPedRunningRagdollTask( ped )
-
-function checkDamage( ped )
-
-    if phealth <= damages.h1 then
-
-        SetPedToRagdoll( ped, 2000, 1000, 2, false, false, false )
-        
-    elseif ( phealth <= damages.h2 ) and ( phealth >= damages.h1 ) then
-
-        SetPedToRagdoll(ped, 4000, 1000, 1, false, false, false )
-
-    elseif ( phealth <= damages.h3 ) and ( phealth >= damages.h2 ) then
-
-        SetPedToRagdoll(ped, 5000, 1000, 1, false, false, false )
-        
-    elseif ( phealth <= damages.h4 ) and ( phealth >= damages.h3 ) then
-  
-        SetPedToRagdoll( ped, 5000, 1000, 0, false, false, false )
-        
-    else
-
-    end
-
-end
-
-
+local sh = GetEntityHealth(ply)
 Citizen.CreateThread(function()
-
-    while true do
-
-        Citizen.Wait( 0 )
-        
-            SetPedCanRagdoll( ped, true )
-
-            if ( GetEntityHealth( ped ) < GetEntityMaxHealth( ped ) ) and ( ( prag ~= true ) or ( frag ~= true ) )  and ( GetEntityHealth( ped ) ~= oldhealth ) and ( GetPedArmour( ped ) < 50 ) then
-                
-                oldhealth = GetEntityHealth( ped )
-
-				        checkDamage( ped ) 
-                             
-            end
-
-    end
+	while true do
+		Citizen.Wait(0)
+        local ply = GetPlayerPed(-1)
+            if HasEntityBeenDamagedByAnyPed(ply) then
+                    dam = sh - GetEntityHealth(ply)
+                    if (dam > 0) and (GetPedArmour(ply) <= 25) then
+                        if (dam >= 0) and (dam <= 5) then
+                            print("hurt1")
+                            hurtMedium(ply, dam)
+                        elseif (dam >= 6) and (dam <= 10) then
+                            print("hurt2")
+                            hurtMediumBad(ply, dam)
+                        elseif (dam >= 11) and (dam <= 16) then
+                            print("hurt3")  
+                            hurtPainful(ply, dam)
+                        elseif dam >= 17 then
+                            print("hurt4")
+                            hurtPainful(ply, dam)
+                        end
+                    end
+                    
+                    sh = GetEntityHealth(ply)
+			end
+			ClearEntityLastDamageEntity(ply)
+	 end
 end)
+
+
+
+function hurtMedium(ped, r)
+    if IsEntityDead(ped) then return false end
+    SetPedToRagdoll(GetPlayerPed(-1), 2000, 2000, 0, 0, 0, 0)
+    print(r)
+end
+function hurtMediumBad(ped, r)
+    if IsEntityDead(ped) then return false end
+    SetPedToRagdoll(GetPlayerPed(-1), 4000, 4000, 0, 0, 0, 0)
+    --Citizen.SetTimeout( 4000, function() SetPedIsDrunk(ped, true) end)
+    --Citizen.SetTimeout( 30000, function() SetPedIsDrunk(ped, false) end)
+    print(r)
+end
+function hurtBad(ped, r)
+    if IsEntityDead(ped) then return false end
+    SetPedToRagdoll(GetPlayerPed(-1), 5000, 5000, 0, 0, 0, 0)
+    --Citizen.SetTimeout( 5000, function() SetPedIsDrunk(ped, true) end)
+    --Citizen.SetTimeout( 120000, function() SetPedIsDrunk(ped, false) end)
+    print(r)
+end
+function hurtPainful(ped, r)
+    if IsEntityDead(ped) then return false end
+    SetPedToRagdoll(GetPlayerPed(-1), 15000, 15000, 0, 0, 0, 0)
+    --Citizen.SetTimeout( 15000, function() SetPedIsDrunk(ped, true) end)
+    --Citizen.SetTimeout( 120000, function() SetPedIsDrunk(ped, false) end)
+    print(r)
+end
